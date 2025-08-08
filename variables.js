@@ -19,6 +19,22 @@ module.exports = async function (self) {
             name: `Viewer ${i} - Projected Source Name`
         });
 
+        for (let captionsIndex = 0; captionsIndex < viewer.layout.captions.length; captionsIndex++){
+            let caption = viewer.layout.captions[captionsIndex];
+            allVariables.push({
+                variableId: `viewer${i}_caption${captionsIndex}_code`,
+                name: `Viewer ${i} - Caption ${captionsIndex} - Assigned Code`
+            });
+            allVariables.push({
+                variableId: `viewer${i}_caption${captionsIndex}_value`,
+                name: `Viewer ${i} - Caption ${captionsIndex} - Assigned Value`
+            });
+
+            values[`viewer${i}_caption${captionsIndex}_code`] = caption.code;
+            values[`viewer${i}_caption${captionsIndex}_value`] = caption.text;
+        }
+        
+
         values[`viewer${i}_selected_viewport`] = viewer.focusedViewportIndex;
         values[`viewer${i}_audiosource`] = viewer.audioMonitorSourceName;
         values[`viewer${i}_projectorsource`] = viewer.projectorSource.ndiSource || "(None)";
@@ -42,6 +58,15 @@ module.exports = async function (self) {
         }
     }
 
+    allVariables.push({variableId: `KVMNewMode`,
+            name: `KVM New Mode`})
+
+    allVariables.push({variableId: `PTZLockoutMode`,
+            name: `PTZ Lockout Mode`})
+    
+    values['KVMNewMode'] = "immerisive";
+    values['PTZLockoutMode'] = "unlocked";
+    
 	self.setVariableDefinitions(allVariables);
     self.setVariableValues(values);
 

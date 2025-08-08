@@ -5,12 +5,74 @@ const UpdateFeedbacks = require('./feedbacks')
 const UpdateVariableDefinitions = require('./variables')
 const { EventSource } = require('eventsource');
 
+//Option fields to be used in actions and feedbacks
+  const FIELDS = {
+        Url: (label) => ({
+            type: 'textinput',
+            label: label,
+            id: 'url',
+            default: '',
+            useVariables: true,
+      }),
+        Viewport: {
+            id: 'viewportIndex',
+            type: "textinput",
+            label: 'Viewport Index (0 = first viewport)',
+            default: '0',
+            useVariables: true,
+        },
+        Viewer:{
+            id: 'viewerIndex',
+            type: "textinput",
+            label: 'Viewer Index (0 = first viewer)',
+            default: '0',
+            useVariables: true,
+        },
+        PresetNum:{
+            id: 'presetNum',
+            type: "number",
+            label: 'Preset Number',
+            default: '0',
+            useVariables: true,
+      },
+      KVMNewMode: {
+            id: 'kvmNewMode',
+            type: "dropdown",
+            label: 'NewMode',
+          default: 'immersive',
+          choices: [
+              { id: 'explicit', label: 'Explicit' },
+              { id: 'immersive', label: 'Immersive' },
+            ],
+            useVariables: true,
+      },
+      LockoutNewMode: {
+        id: 'kvmNewMode',
+            type: "dropdown",
+            label: 'NewMode',
+          default: 'unlocked',
+          choices: [
+              { id: 'locked', label: 'Locked' },
+              { id: 'unlocked', label: 'Not Locked' },
+            ],
+            useVariables: true,
+      },
+    }
+    //   OutputNum: {
+    //         id: 'outputNum',
+    //         type: "number",
+    //         label: 'Output Number',
+    //         default: '0',
+    //         useVariables: true,
+    //     },
+    // }
+
 class ModuleInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
 	}
 
-	async init(config) {
+    async init(config) {
 		this.config = config;
         this.state = {};
 
@@ -58,6 +120,7 @@ class ModuleInstance extends InstanceBase {
         hub.addEventListener("ProjectorChange", () => this.fetchStateAndUpdateFeedback());
         hub.addEventListener("SourceChange", () => this.fetchStateAndUpdateFeedback());
         hub.addEventListener("SendersUpdated", () => this.fetchStateAndUpdateFeedback());
+        hub.addEventListener("AudioMonitorSourceChange", () => this.fetchStateAndUpdateFeedback());
         this.hub = hub;
 
     }
@@ -320,11 +383,11 @@ class ModuleInstance extends InstanceBase {
     }
 
 	updateActions() {
-		UpdateActions(this)
+		UpdateActions(this, FIELDS)
 	}
 
 	updateFeedbacks() {
-		UpdateFeedbacks(this)
+		UpdateFeedbacks(this, FIELDS)
 	}
 
 	updateVariableDefinitions() {
