@@ -19,6 +19,24 @@ module.exports = async function (self) {
             name: `Viewer ${i} - Projected Source Name`
         });
 
+        allVariables.push({
+            variableId: `viewer${i}_focusedViewportIndex`,
+            name: `Viewer ${i} - Focused Viewport`
+        });
+
+        allVariables.push({
+            variableId: `KVMNewMode`,
+            name: `KVM New Mode`
+        });
+
+        allVariables.push({
+            variableId: `PTZLockoutMode`,
+            name: `PTZ Lockout Mode`
+        });
+    
+            //fix this
+    
+
         for (let captionsIndex = 0; captionsIndex < viewer.layout.captions.length; captionsIndex++){
             let caption = viewer.layout.captions[captionsIndex];
             allVariables.push({
@@ -38,6 +56,9 @@ module.exports = async function (self) {
         values[`viewer${i}_selected_viewport`] = viewer.focusedViewportIndex;
         values[`viewer${i}_audiosource`] = viewer.audioMonitorSourceName;
         values[`viewer${i}_projectorsource`] = viewer.projectorSource.ndiSource || "(None)";
+        values[`viewer${i}_focusedViewportIndex`] = viewer.focusedViewportIndex;
+        values[`viewer${i}_KVMNewMode`] = viewer.kvmMode;
+        values[`viewer${i}_PTZLockoutMode`] = viewer.lockPtzIfSourceOnProgram;
 
         for(let vpi = 0; vpi < viewer.outputs.length; vpi++) {
             let output = viewer.outputs[vpi];
@@ -58,46 +79,11 @@ module.exports = async function (self) {
         }
     }
 
-    allVariables.push({variableId: `KVMNewMode`,
-            name: `KVM New Mode`})
 
-    allVariables.push({variableId: `PTZLockoutMode`,
-            name: `PTZ Lockout Mode`})
-    
-    values['KVMNewMode'] = "immerisive";
-    values['PTZLockoutMode'] = "unlocked";
     
 	self.setVariableDefinitions(allVariables);
     self.setVariableValues(values);
 
     return;
-    // let allVariables = [...self.state.slots.map(o => ({
-    //     variableId: `slot_${o.code}_locked`,
-    //     name: `Slot ${o.slotName} Lock Status`
-    // })), ...self.state.slots.map(o => ({
-    //     variableId: `slot_${o.code}`,
-    //     name: `Slot ${o.slotName} Source`
-    // }))]
     
-
-	self.setVariableDefinitions(allVariables);
-
-
-
-    for(let i = 0; i < self.state.slots.length; i++) {
-        let o = self.state.slots[i];
-
-        values[`slot_${o.code}`] = o.sourceName;
-        values[`slot_${o.code}_locked`] = o.isLocked;
-    }
-
-
-        
-        
-        
-    //     [
-	// 	{ variableId: 'variable1', name: 'My first variable' },
-	// 	{ variableId: 'variable2', name: 'My second variable' },
-	// 	{ variableId: 'variable3', name: 'Another variable' },
-	// ])
 }

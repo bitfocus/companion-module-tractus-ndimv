@@ -1,7 +1,8 @@
-const { InstanceBase, Regex, runEntrypoint, InstanceStatus, combineRgb } = require('@companion-module/base')
+const { InstanceBase, Regex, runEntrypoint, InstanceStatus } = require('@companion-module/base')
 const UpgradeScripts = require('./upgrades')
 const UpdateActions = require('./actions')
 const UpdateFeedbacks = require('./feedbacks')
+const UpdatePresets = require('./presets')
 const UpdateVariableDefinitions = require('./variables')
 const { EventSource } = require('eventsource');
 
@@ -30,7 +31,7 @@ const { EventSource } = require('eventsource');
         },
         PresetNum:{
             id: 'presetNum',
-            type: "number",
+            type: "textinput",
             label: 'Preset Number',
             default: '0',
             useVariables: true,
@@ -57,7 +58,35 @@ const { EventSource } = require('eventsource');
             ],
             useVariables: true,
       },
-    }
+      ImageCode: {
+            id: 'imageCode',
+            type: 'textinput',
+            label: 'Image Code',
+            default: '',
+            useVariables: true,
+    },
+    CaptionCode: {
+        id: 'captionCode',
+        type: 'textinput',
+        label: 'Caption Code',
+        default: '',
+        useVariables: true,
+    },
+    XPos: {
+        id: 'xPos',
+        type: 'number',
+        label: 'X Position',
+        default: '0',
+        useVariables: true,
+    },
+    YPos: {
+        id: 'yPos',
+        type: 'number',
+        label: 'Y Position',
+        default: '0',
+        useVariables: true,
+    },
+}
     //   OutputNum: {
     //         id: 'outputNum',
     //         type: "number",
@@ -83,18 +112,21 @@ class ModuleInstance extends InstanceBase {
         try {
             await this.fetchLatestState();
             await this.setupEventHub();
-            this.updatePresets();
+            // await this.updatePresets();
             didInitOK = true;
         } catch(ex) {
             console.error("Error on startup - ", ex);
             didInitOK = false;
         }
 
+    this.updateStatus(InstanceStatus.Ok)
+
         if(didInitOK) {
             this.updateStatus(InstanceStatus.Ok)
             this.updateActions() // export actions
             this.updateFeedbacks() // export feedbacks
             this.updateVariableDefinitions() // export variable definitions
+            this.updatePresets() // export presets
         } else {
             this.updateStatus(InstanceStatus.ConnectionFailure);
         }
@@ -221,165 +253,14 @@ class ModuleInstance extends InstanceBase {
 	}
 
     updatePresets() {
-        let presets = [];
-        return;
-        if(this.state && this.state.sources) {
-            try {
-                this.state.slots.forEach((slot) => {
-
-                    let toAdd = {
-                        type: 'button',
-                        category: 'Slot Assignments',
-                        name: slot.slotName,
-                        style: {
-                            text: slot.slotName,
-                            size: 'auto',
-                            color: combineRgb(255, 255, 255),
-                            bgcolor: combineRgb(0,0,0)
-                        },
-                        steps: [
-                            {
-                                down: [{
-                                    actionId: 'set_slot_output',
-                                    options: {
-                                        slot: slot.code,
-                                        sourcedd: '',
-                                    }
-                                }],
-                                up: [],
-                            }
-                        ],
-                        feedbacks: [{
-                            feedbackId: "SlotSource",
-                            options: {
-                                slot: slot.code,
-                                sourcedd: '',
-                                sourcename: '',
-                            },
-                            style: {
-                                color: combineRgb(255, 255, 255),
-                                bgcolor: combineRgb(160, 0, 0)
-                            }
-                        }]
-                    };
-
-                    presets.push(toAdd);
-
-                    toAdd = {
-                        type: 'button',
-                        category: 'Slot Locking',
-                        name: slot.slotName,
-                        style: {
-                            text: slot.slotName,
-                            size: 'auto',
-                            color: combineRgb(255, 255, 255),
-                            bgcolor: combineRgb(0,0,0)
-                        },
-                        steps: [
-                            {
-                                down: [{
-                                    actionId: 'lock_slot',
-                                    options: {
-                                        slot: slot.code
-                                    }
-                                }],
-                                up: [],
-                            }
-                        ],
-                        feedbacks: [{
-                            feedbackId: "LockedSlot",
-                            options: {
-                                slot: slot.code
-                            },
-                            style: {
-                                color: combineRgb(0, 0, 0),
-                                bgcolor: combineRgb(160, 160, 0)
-                            }
-                        }]
-                    };
-                    
-
-                    presets.push(toAdd);
-
-                    toAdd = {
-                        type: 'button',
-                        category: 'Slot Unlocking',
-                        name: slot.slotName,
-                        style: {
-                            text: slot.slotName,
-                            size: 'auto',
-                            color: combineRgb(255, 255, 255),
-                            bgcolor: combineRgb(0,0,0)
-                        },
-                        steps: [
-                            {
-                                down: [{
-                                    actionId: 'unlock_slot',
-                                    options: {
-                                        slot: slot.code
-                                    }
-                                }],
-                                up: [],
-                            }
-                        ],
-                        feedbacks: []
-                    };
-                    
-
-                    presets.push(toAdd);
-                });
-
-
-                this.state.sources.forEach((source) => {
-
-                    let toAdd = {
-                        type: 'button',
-                        category: 'Source Assignments',
-                        name: source.name,
-                        style: {
-                            text: source.name,
-                            size: 'auto',
-                            color: combineRgb(255, 255, 255),
-                            bgcolor: combineRgb(0,0,0)
-                        },
-                        steps: [
-                            {
-                                down: [{
-                                    actionId: 'set_slot_output',
-                                    options: {
-                                        slot: '',
-                                        sourcedd: source.name,
-                                    }
-                                }],
-                                up: [],
-                            }
-                        ],
-                        feedbacks: [{
-                            feedbackId: "SlotSource",
-                            options: {
-                                sourcedd: '',
-                                slot: '',
-                                sourcename: source.name
-                            },
-                            style: {
-                                color: combineRgb(255, 255, 255),
-                                bgcolor: combineRgb(160, 0, 0)
-                            }
-                        }]
-                    };
-
-                    presets.push(toAdd);
-                });                
-
+        UpdatePresets(this)
+        // let presets = [];
+        // return;
+        
     
+        // }
 
-            } catch(ex) {
-                console.error("Error when attempting to create the presets.", ex)
-            }
-    
-        }
-
-        this.setPresetDefinitions(presets);
+        // this.setPresetDefinitions(presets);
     }
 
 	updateActions() {

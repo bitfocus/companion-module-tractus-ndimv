@@ -165,6 +165,30 @@ module.exports = function (self, FIELDS) {
     };
     
     /*
+    Function: Unfocus Viewer
+    Options: viewer number  
+    Description: Remove all focus from a viewer
+    */
+    actions['unfocus'] = {
+        name: 'Unfocus Viewer',
+        options: [FIELDS.Viewer],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+
+                // self.log('info', `unfocus called! vn:${viewer_num}`);
+
+                let url = `viewer/${viewer_num}/unfocus`
+                await self.getWithoutResult(url)
+
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        }
+    };
+
+    /*
     Function: Load Preset
     Options: viewer number and preset number  
     Description: load preset
@@ -270,110 +294,131 @@ module.exports = function (self, FIELDS) {
 			}
     };
 
+    
+    // actions['image_visible'] = {
+    //     name: 'Image Visible',
+    //     options: [FIELDS.Viewer, FIELDS.ImageCode],
+    //     callback: async (action, context) => {
+    //         try {
+    //             let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+    //             let image_code = await context.parseVariablesInString(action.options.imageCode || '')
+
+    //             let url = `viewer/${viewer_num}/image/visible/${image_code}`
+    //             await self.getWithoutResult(url)
+    //         } catch (e) {
+    //             self.log('error', `HTTP GET Request failed (${e.message})`)
+    //             self.updateStatus(InstanceStatus.UnknownError, e.code)
+    //         }
+    //     },
+    // }
+
+    actions['image_show'] = {
+        name: 'Show Image',
+        options: [FIELDS.Viewer, FIELDS.ImageCode],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+                let image_code = await context.parseVariablesInString(action.options.imageCode || '')
+
+                let url = `viewer/${viewer_num}/image/show/${image_code}`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+    actions['image_hide'] = {
+        name: 'Hide Image',
+        options: [FIELDS.Viewer, FIELDS.ImageCode],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+                let image_code = await context.parseVariablesInString(action.options.imageCode || '')
+
+                let url = `viewer/${viewer_num}/image/hide/${image_code}`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+    actions['image_move'] = {
+        name: 'Move Image',
+        options: [FIELDS.Viewer, FIELDS.ImageCode, FIELDS.XPos, FIELDS.YPos],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+                let image_code = await context.parseVariablesInString(action.options.imageCode || '')
+                let x_pos = await context.parseVariablesInString(action.options.xPos || '0')
+                let y_pos = await context.parseVariablesInString(action.options.yPos || '0')
+
+                let url = `viewer/${viewer_num}/image/move/${image_code}/${x_pos}/${y_pos}`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+    actions['caption_clear_all'] = {
+        name: 'Clear All Captions',
+        options: [FIELDS.Viewer],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+
+                let url = `viewer/${viewer_num}/caption/clearall`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+    actions['caption_show'] = {
+        name: 'Show Caption',
+        options: [FIELDS.Viewer, FIELDS.CaptionCode],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+                let caption_code = await context.parseVariablesInString(action.options.captionCode || '')
+
+                let url = `viewer/${viewer_num}/caption/show/${caption_code}`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+    actions['caption_hide'] = {
+        name: 'Hide Caption',
+        options: [FIELDS.Viewer, FIELDS.CaptionCode],
+        callback: async (action, context) => {
+            try {
+                let viewer_num = await context.parseVariablesInString(action.options.viewerIndex || '0')
+                let caption_code = await context.parseVariablesInString(action.options.captionCode || '')
+
+                let url = `viewer/${viewer_num}/caption/hide/${caption_code}`
+                await self.getWithoutResult(url)
+            } catch (e) {
+                self.log('error', `HTTP GET Request failed (${e.message})`)
+                self.updateStatus(InstanceStatus.UnknownError, e.code)
+            }
+        },
+    }
+
+
+
+
     self.setActionDefinitions(actions);
 
     return;
-
-	self.setActionDefinitions({
-		set_slot_output: {
-			name: 'Set Slot Source',
-			options: [
-                {
-                    id: 'sourcedd',
-                    type: 'dropdown',
-                    label: 'NDI Source',
-                    default: '',
-                    choices: [{id: '', label: '(Use Custom Source Name)'}, ...self.state.sources.map(o => ({
-                        id: o.name,
-                        label: `${o.name}`
-                    }))]
-                },
-				{
-					id: 'source',
-					type: 'textinput',
-					label: 'Custom NDI Source Name',
-					default: "",
-					min: 0,
-					max: 300,
-				},
-                {
-                    id: 'slot',
-                    type: 'dropdown',
-                    label: 'Router Slot',
-                    default: '',
-                    choices: self.state.slots.map(o => ({
-                        id: o.code,
-                        label: `${o.slotName} (${o.code})`
-                    }))
-                }
-			],
-			callback: async (event) => {
-                let src = event.options.sourcedd;
-                if(!src) {
-                    src = event.options.source;
-                }
-
-                await self.put(`slots/${event.options.slot}/set/${src}`);
-			},
-		},
-
-		lock_slot: {
-			name: 'Lock Slot',
-			options: [
-                {
-                    id: 'slot',
-                    type: 'dropdown',
-                    label: 'Router Slot',
-                    default: '',
-                    choices: self.state.slots.map(o => ({
-                        id: o.code,
-                        label: `${o.slotName} (${o.code})`
-                    }))
-                }
-			],
-			callback: async (event) => {
-                await self.put(`slots/lock/${event.options.slot}`);
-			},
-		},
-
-		unlock_slot: {
-			name: 'Unlock Slot',
-			options: [
-                {
-                    id: 'slot',
-                    type: 'dropdown',
-                    label: 'Router Slot',
-                    default: '',
-                    choices: self.state.slots.map(o => ({
-                        id: o.code,
-                        label: `${o.slotName} (${o.code})`
-                    }))
-                }
-			],
-			callback: async (event) => {
-                await self.put(`slots/unlock/${event.options.slot}`);
-			},
-		},
-
-
-
-        clear_slot_output: {
-            name: 'Clear Slot Output',
-			options: [
-                {
-                    id: 'slot',
-                    type: 'dropdown',
-                    label: 'Router Slot',
-                    default: '',
-                    choices: self.state.slots.map(o => ({
-                        id: o.code,
-                        label: `${o.slotName} (${o.code})`
-                    }))
-                }
-			],
-			callback: async (event) => {
-                await self.put(`slots/${event.options.slot}/clear`);
-			},            
-        },
-	})
 }
